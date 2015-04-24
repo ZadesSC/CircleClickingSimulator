@@ -1,0 +1,47 @@
+package io.zades.ccs.main.gamestates;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import io.zades.ccs.main.CCSCore;
+import io.zades.ccs.main.managers.GameStateManager;
+
+/**
+ * Created by Darren on 10/22/2014.
+ */
+public abstract class AbstractGameState implements Screen
+{
+	private GameStateManager.GAME_STATE gameState;
+	protected CCSCore game;
+
+	public AbstractGameState(GameStateManager.GAME_STATE gameState, CCSCore game)
+	{
+		this.gameState = gameState;
+		this.game = game;
+	}
+
+	//method called when entering state
+	public void enterState()
+	{
+
+	}
+
+	//method called when exiting this state
+	public void exitState()
+	{
+
+	}
+
+	@Override
+	public void render(float delta)
+	{
+		// the following code clears the screen with the given RGB color (black)
+		Gdx.gl.glClearColor( 0f, 0f, 0f, 1f );
+		Gdx.gl.glClear( GL20.GL_COLOR_BUFFER_BIT );
+	}
+
+	public GameStateManager.GAME_STATE getGameState()
+	{
+		return gameState;
+	}
+}
