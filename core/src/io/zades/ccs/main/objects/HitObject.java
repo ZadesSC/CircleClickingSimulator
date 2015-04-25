@@ -1,5 +1,8 @@
 package io.zades.ccs.main.objects;
 
+import io.zades.ccs.main.math.Coords;
+import io.zades.ccs.main.math.Path;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +54,7 @@ public class HitObject
 	private int hitSoundType;
 
 	private List<Coords> coords;
+	private Path curve;
 	private long offsetTime;
 	private boolean isNewCombo;
 
@@ -124,5 +128,15 @@ public class HitObject
 	public void setNewCombo(boolean isNewCombo)
 	{
 		this.isNewCombo = isNewCombo;
+	}
+
+	public Path getCurve()
+	{
+		return curve;
+	}
+
+	public void setCurve(Path curve)
+	{
+		this.curve = curve;
 	}
 }

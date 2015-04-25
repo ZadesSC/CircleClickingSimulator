@@ -53,17 +53,24 @@ public class BeatmapManager
 				FileHandle[] osuFiles = file.list(".osu");
 				for(FileHandle osuFile: osuFiles)
 				{
-					Gdx.app.debug(BeatmapManager.class.toString(), "File: " + osuFile.toString());
+					try
+					{
+						Gdx.app.debug(BeatmapManager.class.toString(), "File: " + osuFile.toString());
 
-					Beatmap beatmap = new Beatmap();
-					OsuBeatmapFileParser parser = new OsuBeatmapFileParser(this.game);
-					beatmap = parser.parseFile(beatmap, osuFile);
-					beatmap.setDirectoryLocation(file.toString());
-					beatmap.setFileLocation(osuFile.toString());
-					this.getListOfBeatmapsByDirectory().put(osuFile, beatmap);
+						Beatmap beatmap = new Beatmap();
+						OsuBeatmapFileParser parser = new OsuBeatmapFileParser(this.game);
 
-					//Gdx.app.debug(BeatmapManager.class.toString(), new Json().prettyPrint(beatmap));
+							beatmap = parser.parseFile(beatmap, osuFile);
 
+						beatmap.setDirectoryLocation(file.toString());
+						beatmap.setFileLocation(osuFile.toString());
+						this.getListOfBeatmapsByDirectory().put(osuFile, beatmap);
+						//Gdx.app.debug(BeatmapManager.class.toString(), new Json().prettyPrint(beatmap));
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
 				}
 			}
 		}

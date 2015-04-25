@@ -3,8 +3,9 @@ package io.zades.ccs.main.io;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import io.zades.ccs.main.CCSCore;
+import io.zades.ccs.main.math.Bezier;
 import io.zades.ccs.main.objects.beatmaps.Beatmap;
-import io.zades.ccs.main.objects.Coords;
+import io.zades.ccs.main.math.Coords;
 import io.zades.ccs.main.objects.HitObject;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class OsuBeatmapFileParser
 		this.currentSection = "";
 	}
 
-	public Beatmap parseFile(Beatmap beatmap, FileHandle fileh)
+	public Beatmap parseFile(Beatmap beatmap, FileHandle fileh) throws Exception
 	{
 		//sanity checks
 		if(beatmap == null)
@@ -151,7 +152,7 @@ public class OsuBeatmapFileParser
 		}
 	}
 
-	private void parseHitObjects(Beatmap beatmap, List<String> lines)
+	private void parseHitObjects(Beatmap beatmap, List<String> lines) throws Exception
 	{
 		for(String line: lines)
 		{
@@ -162,7 +163,7 @@ public class OsuBeatmapFileParser
 		}
 	}
 
-	private HitObject parseHitObject(String line)
+	private HitObject parseHitObject(String line) throws Exception
 	{
 		//TODO: finish this shit
 		//x, y, offset, type, hitsound, additions
@@ -204,8 +205,46 @@ public class OsuBeatmapFileParser
 		else if((type & HitObject.SLIDER_HIT_OBJECT) ==  HitObject.SLIDER_HIT_OBJECT)
 		{
 			obj.setHitObjectType(HitObject.SLIDER_HIT_OBJECT);
-			//TODO: parse extra points for sliders
-			String[] sliderCoords = hitObjectParts[5].split("|");
+
+			//Extracts from L|xxx:yyy|xxx:yyy etc
+			String[] sliderCoords = hitObjectParts[5].split("\\|");
+
+			//Adding the additional coords
+			for(int x = 1; x < sliderCoords.length; x++)
+			{
+				String[] pairCoords =  sliderCoords[x].split(":");
+				if(pairCoords.length != 2)
+				{
+					throw new Exception("Hit Object recognized as a slider but have invalid coordinates");
+				}
+
+				obj.getCoords().add(new Coords(Double.parseDouble(pairCoords[0]), Double.parseDouble(pairCoords[1]), Coords.CoordType.GAME));
+			}
+
+			Gdx.app.debug(this.getClass().toString(), "Number of Coords: " + obj.getCoords().size());
+
+			//Set slider type and add the path
+			//TODO: add the breaks back in
+			switch(sliderCoords[0])
+			{
+				case "L":
+					obj.setSliderType(HitObject.LINEAR_SLIDER);
+					//break;
+				case "C":
+					obj.setSliderType(HitObject.CATMULL_SLIDER);
+					//break;
+				case "P":
+					obj.setSliderType(HitObject.PASS_THROUGH_SLIDER);
+					//break;
+				case "B":
+					obj.setSliderType(HitObject.BEZIER_SLIDER);
+					obj.setCurve(new Bezier(obj.getCoords()));
+					break;
+				default:
+					//this shouldn't happen, throw error
+					throw new Exception("Hit Object recognized as a slider but have invalid arguments");
+			}
+
 			//TODO: parse additions
 			//TODO: parse edge crap
 		}

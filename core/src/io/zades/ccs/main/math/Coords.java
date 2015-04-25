@@ -1,4 +1,4 @@
-package io.zades.ccs.main.objects;
+package io.zades.ccs.main.math;
 
 import com.badlogic.gdx.Gdx;
 

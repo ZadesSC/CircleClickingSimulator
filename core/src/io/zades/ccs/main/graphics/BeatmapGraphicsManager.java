@@ -1,9 +1,12 @@
 package io.zades.ccs.main.graphics;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import io.zades.ccs.main.CCSCore;
+import io.zades.ccs.main.math.Bezier;
 import io.zades.ccs.main.objects.CCSSkin;
 import io.zades.ccs.main.objects.HitObject;
 import io.zades.ccs.main.objects.beatmaps.Beatmap;
@@ -22,6 +25,7 @@ public class BeatmapGraphicsManager
     private HashMap<Long, Pair<HitObject, Boolean>> drawableHitObjects;
 
     private SpriteBatch batch;
+	private ShapeRenderer shapeRenderer;
 
 
     public BeatmapGraphicsManager(CCSCore game, Beatmap beatmap)
@@ -31,6 +35,7 @@ public class BeatmapGraphicsManager
         this.drawableHitObjects = new HashMap<>();
 
         this.batch = new SpriteBatch();
+	    this.shapeRenderer = new ShapeRenderer();
     }
 
     //This method exists so that if a long ass song is played the loading doesn't stop the default thread
@@ -59,8 +64,10 @@ public class BeatmapGraphicsManager
 
 
         this.batch.begin();
+	    this.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+	    this.shapeRenderer.setColor(Color.WHITE);
 
-        //TODO: might be more effiecnt to iterate over the list of hitobjects
+	    //TODO: might be more effiecnt to iterate over the list of hitobjects
         for(long time = maxBeforeDrawTime; time <= maxAfterDrawTime; time++)
         {
             if(this.drawableHitObjects.containsKey(time))
@@ -70,6 +77,7 @@ public class BeatmapGraphicsManager
         }
 
         this.batch.end();
+	    this.shapeRenderer.end();
     }
 
     private void drawHitObject(long elapsedTime, HitObject hitObject)
@@ -78,6 +86,9 @@ public class BeatmapGraphicsManager
         {
             case HitObject.CIRCLE_HIT_OBJECT:
                 this.drawHitCircleObject(elapsedTime, hitObject);
+                break;
+            case HitObject.SLIDER_HIT_OBJECT:
+                this.drawHitSliderObject(elapsedTime, hitObject);
                 break;
             default:
                 this.drawHitCircleObject(elapsedTime, hitObject);
@@ -117,8 +128,39 @@ public class BeatmapGraphicsManager
 
     private void drawHitSliderObject(long elapsedTime, HitObject hitObject)
     {
+        //Draws the circle before the slider
+        this.drawHitCircleObject(elapsedTime, hitObject);
 
+        //Draws slider
+        switch(hitObject.getSliderType())
+        {
+            case "L":
+                break;
+            case "C":
+                break;
+            case "P":
+                break;
+            case "B":
+                this.drawBezier(elapsedTime, hitObject);
+                break;
+            default:
+                //TODO: add this back in?
+                //this shouldn't happen, throw error
+                //throw new Exception("Hit Object recognized as a slider but have invalid arguments");
+        }
     }
+
+    private void drawBezier(long elapsedTime, HitObject hitObject)
+    {
+        for(int i = 0; i < hitObject.getCurve().getCachedCalculatedPoints().size() - 1; i++)
+        {
+            //draw straight lines for now
+	        this.shapeRenderer.line((float)hitObject.getCurve().getCachedCalculatedPoints().get(i).getGdxX(),(float)hitObject.getCurve().getCachedCalculatedPoints().get(i)
+			        .getGdxY(),
+                    (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).getGdxX(), (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).getGdxY());
+        }
+    }
+
 
     private void drawHitSpinnerObject(long elapsedTime, HitObject hitObject)
     {
