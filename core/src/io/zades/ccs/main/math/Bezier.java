@@ -1,7 +1,6 @@
 package io.zades.ccs.main.math;
 
-import com.badlogic.gdx.Gdx;
-import io.zades.ccs.main.gamestates.MainMenuGameState;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,21 +11,28 @@ import java.util.List;
  */
 public class Bezier extends Path
 {
-	public Bezier(List<Coords> points)
+	public Bezier(List<Vector2> points)
 	{
 		super(points);
+		this.dervPoints = new ArrayList<>();
+		this.cachedCalculatedPoints = new ArrayList<>();
+		this.cachedCalculatedDervPoints = new ArrayList<>();
+		this.estimatedLength = this.estimateLength(this.points);
+
+		this.calculateDervPoints();
+		this.calculatePath();
 	}
 
 	@Override
-	public Coords valueAt(float t)
+	public Vector2 valueAt(float t)
 	{
 		return this.deCasteljanAlgorithm(this.points, t);
 	}
 
 	@Override
-	public Coords derivativeAt(float t)
+	public Vector2 derivativeAt(float t)
 	{
-		return null;
+		return this.deCasteljanAlgorithm(this.dervPoints, t);
 	}
 
 	@Override
@@ -46,11 +52,13 @@ public class Bezier extends Path
 	{
 		//Well I guess lets try this shit out
 		long segments = this.calculateSegments();
-		this.cachedCalculatedPoints = new ArrayList<>((int)segments);
 
 		for(int x = 0; x < segments; x++)
 		{
+			//calculates points
 			this.cachedCalculatedPoints.add(this.deCasteljanAlgorithm(this.points, (float) (1.0 / ((float) segments) * x)));
+			//calculates derv points
+			//this.cachedCalculatedDervPoints.add(this.deCasteljanAlgorithm(this.dervPoints, (float) (1.0 / ((float) segments) * x)).getNormalizedVector(Vector.VectorType.GAME));
 		}
 
 		//recalculate the length
@@ -64,15 +72,15 @@ public class Bezier extends Path
 	 * @return
 	 */
 	@Override
-	protected float estimateLength(List<Coords> points)
+	protected float estimateLength(List<Vector2> points)
 	{
 		float estLength = 0;
 
 		for(int i = 0; i < points.size() - 1; i++)
 		{
 			//Using distance formula
-			estLength += Math.sqrt( Math.pow(points.get(i).getX() - points.get(i + 1).getX(), 2) +
-					Math.pow(points.get(i).getY() - points.get(i+1).getY(),2));
+			estLength += Math.sqrt(Math.pow(points.get(i).x - points.get(i + 1).x, 2) +
+					Math.pow(points.get(i).y - points.get(i + 1).y, 2));
 		}
 
 		return estLength;
@@ -87,7 +95,7 @@ public class Bezier extends Path
 	 * @param t The position in the curve where  0 <= t <= 1
 	 * @return The coords at t in the curve
 	 */
-	private Coords deCasteljanAlgorithm(List<Coords> points, float t)
+	private Vector2 deCasteljanAlgorithm(List<Vector2> points, float t)
 	{
 		if(points.size() == 1)
 		{
@@ -95,12 +103,12 @@ public class Bezier extends Path
 		}
 		else
 		{
-			List<Coords> newPoints = new ArrayList<>();
+			List<Vector2> newPoints = new ArrayList<>();
 			for(int i = 0; i < points.size() - 1; i++)
 			{
-				double x = (1-t) * points.get(i).getX() + t * points.get(i+1).getX();
-				double y = (1-t) * points.get(i).getY() + t * points.get(i+1).getY();
-				newPoints.add(new Coords(x, y, Coords.CoordType.GAME));
+				float x = (1-t) * points.get(i).x + t * points.get(i+1).x;
+				float y = (1-t) * points.get(i).y + t * points.get(i+1).y;
+				newPoints.add(new Vector2(x, y));
 			}
 
 			return deCasteljanAlgorithm(newPoints, t);
@@ -120,5 +128,19 @@ public class Bezier extends Path
 
 		//TODO: get a better estimation formula
 		return Math.round(Math.sqrt(1 + Math.pow(this.estimateLength(this.points), 2)) + 10);
+	}
+
+	/**
+	 * Function used to calculate the control points for the derivative
+	 */
+	private void calculateDervPoints()
+	{
+		int n = this.points.size() - 1;
+		for(int i = 0; i < n; i++)
+		{
+			float  x = n * (this.points.get(i+1).x - this.points.get(i).x);
+			float y = n * (this.points.get(i+1).y - this.points.get(i).y);
+			this.dervPoints.add(new Vector2(x, y));
+		}
 	}
 }

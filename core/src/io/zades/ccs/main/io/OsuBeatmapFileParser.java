@@ -2,10 +2,10 @@ package io.zades.ccs.main.io;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.math.Vector2;
 import io.zades.ccs.main.CCSCore;
 import io.zades.ccs.main.math.Bezier;
 import io.zades.ccs.main.objects.beatmaps.Beatmap;
-import io.zades.ccs.main.math.Coords;
 import io.zades.ccs.main.objects.HitObject;
 
 import java.util.ArrayList;
@@ -185,14 +185,14 @@ public class OsuBeatmapFileParser
 			return null;
 		}
 
-		Coords coords = new Coords(Double.parseDouble(hitObjectParts[0]), Double.parseDouble(hitObjectParts[1]), Coords.CoordType.GAME);
+		Vector2 vector = new Vector2(Float.parseFloat(hitObjectParts[0]), Float.parseFloat(hitObjectParts[1]));
 		int offset = Integer.parseInt(hitObjectParts[2]);
 		int type = Integer.parseInt(hitObjectParts[3]);
 		int hitSound = Integer.parseInt(hitObjectParts[4]);
 		boolean newCombo = ((type & HitObject.NEW_COMBO) == HitObject.NEW_COMBO);
 
 		HitObject obj = new HitObject();
-		obj.getCoords().add(coords);
+		obj.getCoords().add(vector);
 		obj.setOffsetTime(offset);
 		obj.setHitSoundType(hitSound);
 		obj.setNewCombo(newCombo);
@@ -209,7 +209,7 @@ public class OsuBeatmapFileParser
 			//Extracts from L|xxx:yyy|xxx:yyy etc
 			String[] sliderCoords = hitObjectParts[5].split("\\|");
 
-			//Adding the additional coords
+			//Adding the additional vector
 			for(int x = 1; x < sliderCoords.length; x++)
 			{
 				String[] pairCoords =  sliderCoords[x].split(":");
@@ -218,10 +218,10 @@ public class OsuBeatmapFileParser
 					throw new Exception("Hit Object recognized as a slider but have invalid coordinates");
 				}
 
-				obj.getCoords().add(new Coords(Double.parseDouble(pairCoords[0]), Double.parseDouble(pairCoords[1]), Coords.CoordType.GAME));
+				obj.getCoords().add(new Vector2(Float.parseFloat(pairCoords[0]), Float.parseFloat(pairCoords[1])));
 			}
 
-			Gdx.app.debug(this.getClass().toString(), "Number of Coords: " + obj.getCoords().size());
+			Gdx.app.debug(this.getClass().toString(), "Number of Vector2: " + obj.getCoords().size());
 
 			//Set slider type and add the path
 			//TODO: add the breaks back in

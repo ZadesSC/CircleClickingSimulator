@@ -1,5 +1,7 @@
 package io.zades.ccs.main.math;
 
+import com.badlogic.gdx.math.Vector2;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,10 +12,16 @@ import java.util.List;
 public abstract class Path
 {
 	//List of control points for the path
-	protected List<Coords> points;
+	protected List<Vector2> points;
 
 	//List of calculated points alone the path
-	protected List<Coords> cachedCalculatedPoints;
+	protected List<Vector2> cachedCalculatedPoints;
+
+	//List of control points for the derivative
+	protected List<Vector2> dervPoints;
+
+	//List of calculated points alone the derivative
+	protected List<Vector2> cachedCalculatedDervPoints;
 
 	protected float estimatedLength;
 	protected float exactLength;
@@ -22,13 +30,9 @@ public abstract class Path
 	 * Iniates the path with the given list of control points
 	 * @param points The List of control points
 	 */
-	public Path(List<Coords> points)
+	public Path(List<Vector2> points)
 	{
 		this.points = points;
-		this.cachedCalculatedPoints = new ArrayList<>();
-		this.estimatedLength = this.estimateLength(this.points);
-
-		this.calculatePath();
 	}
 
 	/**
@@ -36,14 +40,14 @@ public abstract class Path
 	 * @param t Is the time where 0 <= t <= 1
 	 * @return The value of T at that point in time
 	 */
-	public abstract Coords valueAt(float t);
+	public abstract Vector2 valueAt(float t);
 
 	/**
 	 * Finds the derivative of T at a given time
 	 * @param t Is the time where 0 <= t <= 1
 	 * @return The value of T at that point in time
 	 */
-	public abstract Coords derivativeAt(float t);
+	public abstract Vector2 derivativeAt(float t);
 
 	/**
 	 * Returns the estimated length of the curve
@@ -67,25 +71,45 @@ public abstract class Path
 	 * Attempts to estimate the length of the curve
 	 * @return The estimated length of the curve
 	 */
-	protected abstract float estimateLength(List<Coords> points);
+	protected abstract float estimateLength(List<Vector2> points);
 
-	public List<Coords> getPoints()
+	public List<Vector2> getPoints()
 	{
 		return points;
 	}
 
-	public void setPoints(ArrayList<Coords> points)
+	public void setPoints(ArrayList<Vector2> points)
 	{
 		this.points = points;
 	}
 
-	public List<Coords> getCachedCalculatedPoints()
+	public List<Vector2> getCachedCalculatedPoints()
 	{
 		return cachedCalculatedPoints;
 	}
 
-	public void setCachedCalculatedPoints(ArrayList<Coords> cachedCalculatedPoints)
+	public void setCachedCalculatedPoints(ArrayList<Vector2> cachedCalculatedPoints)
 	{
 		this.cachedCalculatedPoints = cachedCalculatedPoints;
+	}
+
+	public List<Vector2> getDervPoints()
+	{
+		return dervPoints;
+	}
+
+	public void setDervPoints(List<Vector2> dervPoints)
+	{
+		this.dervPoints = dervPoints;
+	}
+
+	public List<Vector2> getCachedCalculatedDervPoints()
+	{
+		return cachedCalculatedDervPoints;
+	}
+
+	public void setCachedCalculatedDervPoints(List<Vector2> cachedCalculatedDervPoints)
+	{
+		this.cachedCalculatedDervPoints = cachedCalculatedDervPoints;
 	}
 }

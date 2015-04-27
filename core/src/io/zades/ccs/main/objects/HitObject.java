@@ -1,6 +1,6 @@
 package io.zades.ccs.main.objects;
 
-import io.zades.ccs.main.math.Coords;
+import com.badlogic.gdx.math.Vector2;
 import io.zades.ccs.main.math.Path;
 
 import java.util.ArrayList;
@@ -53,17 +53,17 @@ public class HitObject
 	private String sliderType;
 	private int hitSoundType;
 
-	private List<Coords> coords;
+	private List<Vector2> coords;
 	private Path curve;
 	private long offsetTime;
 	private boolean isNewCombo;
 
 	public HitObject()
 	{
-		coords = new ArrayList<Coords>();
+		coords = new ArrayList<Vector2>();
 	}
 
-	public HitObject(List<Coords> coords, long startTime, int type)
+	public HitObject(List<Vector2> coords, long startTime, int type)
 	{
 		this.coords = coords;
 		this.offsetTime = startTime;
@@ -80,12 +80,12 @@ public class HitObject
 		this.hitObjectType = hitObjectType;
 	}
 
-	public List<Coords> getCoords()
+	public List<Vector2> getCoords()
 	{
 		return coords;
 	}
 
-	public void setCoords(List<Coords> coords)
+	public void setCoords(List<Vector2> coords)
 	{
 		this.coords = coords;
 	}

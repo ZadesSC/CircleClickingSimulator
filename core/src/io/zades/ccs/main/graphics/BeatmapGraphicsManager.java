@@ -3,10 +3,11 @@ package io.zades.ccs.main.graphics;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import io.zades.ccs.main.CCSCore;
-import io.zades.ccs.main.math.Bezier;
 import io.zades.ccs.main.objects.CCSSkin;
 import io.zades.ccs.main.objects.HitObject;
 import io.zades.ccs.main.objects.beatmaps.Beatmap;
@@ -27,7 +28,6 @@ public class BeatmapGraphicsManager
     private SpriteBatch batch;
 	private ShapeRenderer shapeRenderer;
 
-
     public BeatmapGraphicsManager(CCSCore game, Beatmap beatmap)
     {
         this.game = game;
@@ -36,7 +36,9 @@ public class BeatmapGraphicsManager
 
         this.batch = new SpriteBatch();
 	    this.shapeRenderer = new ShapeRenderer();
-    }
+
+
+   }
 
     //This method exists so that if a long ass song is played the loading doesn't stop the default thread
     public void init()
@@ -60,10 +62,12 @@ public class BeatmapGraphicsManager
         long maxBeforeDrawTime = elapsedTime - DifficultyTable.odDefaultTable[this.beatmap.getDifficultyData().getOverallDifficulty()][1];
         long maxAfterDrawTime = elapsedTime + DifficultyTable.arDefaultTable[this.beatmap.getDifficultyData().getApproachRate()];
 
-        Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "AR:" + this.beatmap.getDifficultyData().getApproachRate() + " at: " + DifficultyTable.arDefaultTable[this.beatmap.getDifficultyData().getApproachRate()]);
+	    Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "AR:" + this.beatmap.getDifficultyData().getApproachRate() + " at: " + DifficultyTable.arDefaultTable[this.beatmap.getDifficultyData().getApproachRate()]);
 
 
-        this.batch.begin();
+	    this.batch.begin();
+	    this.batch.setProjectionMatrix(this.game.camera.combined);
+
 	    this.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 	    this.shapeRenderer.setColor(Color.WHITE);
 
@@ -88,7 +92,7 @@ public class BeatmapGraphicsManager
                 this.drawHitCircleObject(elapsedTime, hitObject);
                 break;
             case HitObject.SLIDER_HIT_OBJECT:
-                this.drawHitSliderObject(elapsedTime, hitObject);
+                //this.drawHitSliderObject(elapsedTime, hitObject);
                 break;
             default:
                 this.drawHitCircleObject(elapsedTime, hitObject);
@@ -99,8 +103,8 @@ public class BeatmapGraphicsManager
 
     private void drawHitCircleObject(long elapsedTime, HitObject hitObject)
     {
-        float hitObjectX = (float)hitObject.getCoords().get(0).getGdxX();
-        float hitObjectY = (float)hitObject.getCoords().get(0).getGdxY();
+        float hitObjectX = (float)hitObject.getCoords().get(0).x;
+        float hitObjectY = (float)hitObject.getCoords().get(0).y;
 
         //draw the appraoch circle
         if(hitObject.getOffsetTime() >= elapsedTime)
@@ -120,7 +124,7 @@ public class BeatmapGraphicsManager
         //draw only the circle
         //TODO: overlay circle?
         Texture hitCircle = this.game.assetManager.get(this.game.ccsSkinManager.getCurrentCCSSkin().getLocation() + CCSSkin.HIT_CIRCLE, Texture.class);
-        Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "Attempting to draw:" + hitObject.getOffsetTime() + " with (" + hitObject.getCoords().get(0).getX() + ", " + hitObject.getCoords().get(0).getY() + ")" +  " at: " + (float)hitObject.getCoords().get(0).getGdxX() + " " + (float)hitObject.getCoords().get(0).getGdxY() );
+        Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "Attempting to draw:" + hitObject.getOffsetTime() + " with (" + hitObject.getCoords().get(0).x + ", " + hitObject.getCoords().get(0).y + ")" +  " at: " + (float)hitObject.getCoords().get(0).x + " " + (float)hitObject.getCoords().get(0).y );
         Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "Elapsed Time " + elapsedTime);
 
         this.batch.draw(hitCircle,  hitObjectX - hitCircle.getWidth()/2, hitObjectY - hitCircle.getHeight()/2);
@@ -155,12 +159,38 @@ public class BeatmapGraphicsManager
         for(int i = 0; i < hitObject.getCurve().getCachedCalculatedPoints().size() - 1; i++)
         {
             //draw straight lines for now
-	        this.shapeRenderer.line((float)hitObject.getCurve().getCachedCalculatedPoints().get(i).getGdxX(),(float)hitObject.getCurve().getCachedCalculatedPoints().get(i)
-			        .getGdxY(),
-                    (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).getGdxX(), (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).getGdxY());
+	        this.shapeRenderer.line((float)hitObject.getCurve().getCachedCalculatedPoints().get(i).x,(float)hitObject.getCurve().getCachedCalculatedPoints().get(i)
+			        .y,
+                    (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).x, (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).y);
+
+	        this.drawNormal(hitObject.getCurve().getCachedCalculatedDervPoints().get(i), hitObject.getCurve()
+			        .getCachedCalculatedPoints().get(i));
         }
     }
 
+	private void drawNormal(Vector2 slope, Vector2 location)
+	{
+		//point slope form is:
+		//(y-y1) = m(x-x1)
+		//Parametrize it and it becomes:
+		//(y-y1)/m = (x-x1) = t
+		//x = t + x1
+		//y = tm + y1
+		//Using t as from 10 to -10
+//		float t = 0.1f;
+//		float xUpper = t * (float)slope.x + (float)location.x;
+//		float yUpper = t * (float)slope.y + (float)location.y;
+//
+//		float xLower = -1 * t * (float)slope.x + (float)location.x;
+//		float yLower = -1 * t * (float)slope.y + (float)location.y;
+//		this.shapeRenderer.line(xUpper, yUpper, xLower, yLower);
+
+		//Try 2:
+		//Vector2 rotatedVector21 = slope.getNormalizedVector2(Vector2.Vector2Type.LIBGDX).add(location).rotate(location, (float) (Math.PI/2));
+		//Vector2 rotatedVector22 = slope.getNormalizedVector2(Vector2.Vector2Type.LIBGDX).add(location).rotate(location, (float) (-1 * Math.PI/2));
+
+		//this.shapeRenderer.line(rotatedVector21.toGdxVector2(), rotatedVector22.toGdxVector2());
+	}
 
     private void drawHitSpinnerObject(long elapsedTime, HitObject hitObject)
     {

@@ -1,8 +1,7 @@
 package io.zades.ccs.main.gamestates;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import io.zades.ccs.main.CCSCore;
 import io.zades.ccs.main.managers.GameStateManager;
 
@@ -13,6 +12,7 @@ public abstract class AbstractGameState implements Screen
 {
 	private GameStateManager.GAME_STATE gameState;
 	protected CCSCore game;
+	protected Stage mainStage;
 
 	public AbstractGameState(GameStateManager.GAME_STATE gameState, CCSCore game)
 	{
@@ -36,8 +36,17 @@ public abstract class AbstractGameState implements Screen
 	public void render(float delta)
 	{
 		// the following code clears the screen with the given RGB color (black)
-		Gdx.gl.glClearColor( 0f, 0f, 0f, 1f );
-		Gdx.gl.glClear( GL20.GL_COLOR_BUFFER_BIT );
+		//moved to CCSCore
+		//Gdx.gl.glClearColor( 0f, 0f, 0f, 1f );
+		//Gdx.gl.glClear( GL20.GL_COLOR_BUFFER_BIT );
+
+		//Gdx.gl.glClearColor(0, 0, 0, 0);
+		//Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT);
+		this.game.batch.begin();
+		this.game.batch.setProjectionMatrix(this.game.camera.combined);
+		this.game.backgroundSprite480p.draw(this.game.batch);
+		this.game.batch.end();
+
 	}
 
 	public GameStateManager.GAME_STATE getGameState()
