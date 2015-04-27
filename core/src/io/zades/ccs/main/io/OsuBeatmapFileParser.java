@@ -7,6 +7,7 @@ import io.zades.ccs.main.CCSCore;
 import io.zades.ccs.main.math.Bezier;
 import io.zades.ccs.main.objects.beatmaps.Beatmap;
 import io.zades.ccs.main.objects.HitObject;
+import io.zades.ccs.main.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * TODO: refactor is out of static
  * Created by Darren on 10/26/2014.
  */
 public class OsuBeatmapFileParser
@@ -184,15 +184,15 @@ public class OsuBeatmapFileParser
 			{
 			return null;
 		}
+		Vector2 convertedCoords = this.fromOsuToCCSCoordinates(new Vector2(Float.parseFloat(hitObjectParts[0]), Float.parseFloat(hitObjectParts[1])));
 
-		Vector2 vector = new Vector2(Float.parseFloat(hitObjectParts[0]), Float.parseFloat(hitObjectParts[1]));
 		int offset = Integer.parseInt(hitObjectParts[2]);
 		int type = Integer.parseInt(hitObjectParts[3]);
 		int hitSound = Integer.parseInt(hitObjectParts[4]);
 		boolean newCombo = ((type & HitObject.NEW_COMBO) == HitObject.NEW_COMBO);
 
 		HitObject obj = new HitObject();
-		obj.getCoords().add(vector);
+		obj.getCoords().add(convertedCoords);
 		obj.setOffsetTime(offset);
 		obj.setHitSoundType(hitSound);
 		obj.setNewCombo(newCombo);
@@ -218,7 +218,8 @@ public class OsuBeatmapFileParser
 					throw new Exception("Hit Object recognized as a slider but have invalid coordinates");
 				}
 
-				obj.getCoords().add(new Vector2(Float.parseFloat(pairCoords[0]), Float.parseFloat(pairCoords[1])));
+				Vector2 convertedSliderCoords = this.fromOsuToCCSCoordinates(new Vector2(Float.parseFloat(pairCoords[0]), Float.parseFloat(pairCoords[1])));
+				obj.getCoords().add(convertedSliderCoords);
 			}
 
 			Gdx.app.debug(this.getClass().toString(), "Number of Vector2: " + obj.getCoords().size());
@@ -258,6 +259,12 @@ public class OsuBeatmapFileParser
 			return null;
 		}
 
+		//TODO: sort hitobjects just in case, maybe
 		return obj;
+	}
+
+	public Vector2 fromOsuToCCSCoordinates(Vector2 osuCoords)
+	{
+		return new Vector2(osuCoords.x, World.PLAY_FIELD_HEIGHT - osuCoords.y);
 	}
 }
