@@ -43,14 +43,16 @@ public class CCSCore implements ApplicationListener
 		//Cross platform application settings go here
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
 
-		this.ccsSkinManager = new CCSSkinManager(this);
-		this.beatmapManager = new BeatmapManager(this);
-		this.gameStateManager = new GameStateManager(this);
+
+		//singleton class dec
+		this.ccsSkinManager = CCSSkinManager.initialize(this);
+		this.beatmapManager = BeatmapManager.initialize(this);
+		this.gameStateManager = GameStateManager.initialize(this);
 		this.assetManager = new AssetManager();
 
 		//add the fucking camera and viewport shit
 		this.camera = new OrthographicCamera();
-		this.viewport = new ExtendViewport(800, 600, this.camera);
+		this.viewport = new ExtendViewport(640, 480, this.camera);
 		this.viewport.apply();
 		//this.camera.position.set(320,240,0);
 

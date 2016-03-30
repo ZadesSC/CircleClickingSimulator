@@ -68,6 +68,7 @@ public class BeatmapGraphicsManager
 	    this.batch.begin();
 	    this.batch.setProjectionMatrix(this.game.camera.combined);
 
+        this.shapeRenderer.setProjectionMatrix(this.game.camera.combined);
 	    this.shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 	    this.shapeRenderer.setColor(Color.WHITE);
 
@@ -92,12 +93,11 @@ public class BeatmapGraphicsManager
                 this.drawHitCircleObject(elapsedTime, hitObject);
                 break;
             case HitObject.SLIDER_HIT_OBJECT:
-                //this.drawHitSliderObject(elapsedTime, hitObject);
+                this.drawHitSliderObject(elapsedTime, hitObject);
                 break;
             default:
                 this.drawHitCircleObject(elapsedTime, hitObject);
                 break;
-
         }
     }
 
@@ -105,6 +105,8 @@ public class BeatmapGraphicsManager
     {
         float hitObjectX = (float)hitObject.getCoords().get(0).x;
         float hitObjectY = (float)hitObject.getCoords().get(0).y;
+
+        float texScale = 0.66f; //scaling of all textures
 
         //draw the appraoch circle
         if(hitObject.getOffsetTime() >= elapsedTime)
@@ -116,8 +118,8 @@ public class BeatmapGraphicsManager
             float scaleRatio = (float)Math.abs(elapsedTime - hitObject.getOffsetTime())/(float)DifficultyTable.arDefaultTable[this.beatmap.getDifficultyData().getApproachRate()] * 2 + 1;
             Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "Curent Ratio for " + hitObject.getOffsetTime() + " is: " + scaleRatio);
 
-            this.batch.draw(approachCircle, hitObjectX - (approachCircle.getWidth() * scaleRatio)/2, hitObjectY - (approachCircle.getHeight() * scaleRatio)/2,
-                    approachCircle.getWidth() * scaleRatio, approachCircle.getHeight() * scaleRatio);
+            this.batch.draw(approachCircle, hitObjectX - (approachCircle.getWidth() * texScale * scaleRatio)/2, hitObjectY - (approachCircle.getHeight() * texScale * scaleRatio)/2,
+                    approachCircle.getWidth() * texScale * scaleRatio, approachCircle.getHeight() * texScale * scaleRatio);
 
         }
 
@@ -127,7 +129,8 @@ public class BeatmapGraphicsManager
         Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "Attempting to draw:" + hitObject.getOffsetTime() + " with (" + hitObject.getCoords().get(0).x + ", " + hitObject.getCoords().get(0).y + ")" +  " at: " + (float)hitObject.getCoords().get(0).x + " " + (float)hitObject.getCoords().get(0).y );
         Gdx.app.debug(BeatmapGraphicsManager.class.toString(), "Elapsed Time " + elapsedTime);
 
-        this.batch.draw(hitCircle,  hitObjectX - hitCircle.getWidth()/2, hitObjectY - hitCircle.getHeight()/2);
+        //this.batch.draw(hitCircle,  hitObjectX - hitCircle.getWidth()/2, hitObjectY - hitCircle.getHeight()/2, hitCircle.getWidth() * texScale, hitCircle.getHeight() * texScale);
+        this.batchDrawTex(hitCircle, hitObjectX, hitObjectY);
     }
 
     private void drawHitSliderObject(long elapsedTime, HitObject hitObject)
@@ -159,12 +162,11 @@ public class BeatmapGraphicsManager
         for(int i = 0; i < hitObject.getCurve().getCachedCalculatedPoints().size() - 1; i++)
         {
             //draw straight lines for now
-	        this.shapeRenderer.line((float)hitObject.getCurve().getCachedCalculatedPoints().get(i).x,(float)hitObject.getCurve().getCachedCalculatedPoints().get(i)
-			        .y,
+	        this.shapeRenderer.line((float)hitObject.getCurve().getCachedCalculatedPoints().get(i).x,(float)hitObject.getCurve().getCachedCalculatedPoints().get(i).y,
                     (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).x, (float)hitObject.getCurve().getCachedCalculatedPoints().get(i + 1).y);
 
-	        this.drawNormal(hitObject.getCurve().getCachedCalculatedDervPoints().get(i), hitObject.getCurve()
-			        .getCachedCalculatedPoints().get(i));
+	        //this.drawNormal(hitObject.getCurve().getCachedCalculatedDervPoints().get(i), hitObject.getCurve()
+			//        .getCachedCalculatedPoints().get(i));
         }
     }
 
@@ -195,5 +197,10 @@ public class BeatmapGraphicsManager
     private void drawHitSpinnerObject(long elapsedTime, HitObject hitObject)
     {
 
+    }
+
+    private void batchDrawTex(Texture tex, float centerX, float centerY)
+    {
+        batch.draw(tex, centerX - tex.getWidth()/2, centerY - tex.getHeight()/2, tex.getWidth()/2, tex.getHeight()/2, (float)tex.getWidth(), (float)tex.getHeight(), 0.66f, 0.66f, 0f, 0, 0, tex.getWidth(), tex.getHeight(), false, false);
     }
 }

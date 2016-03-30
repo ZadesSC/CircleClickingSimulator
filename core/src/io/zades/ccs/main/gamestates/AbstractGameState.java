@@ -8,11 +8,10 @@ import io.zades.ccs.main.managers.GameStateManager;
 /**
  * Created by Darren on 10/22/2014.
  */
-public abstract class AbstractGameState implements Screen
+public abstract class AbstractGameState extends Stage implements Screen
 {
 	private GameStateManager.GAME_STATE gameState;
 	protected CCSCore game;
-	protected Stage mainStage;
 
 	public AbstractGameState(GameStateManager.GAME_STATE gameState, CCSCore game)
 	{

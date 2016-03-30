@@ -15,15 +15,38 @@ public class BeatmapManager
 {
 	public static final String BEATMAP_PATH = "Beatmaps/";
 
+	private static BeatmapManager instance;
 	private CCSCore game;
 
 	private HashMap<FileHandle, Beatmap> listOfBeatmapsByDirectory;
 
-	public BeatmapManager(CCSCore game)
+	private BeatmapManager()
+	{
+		super();
+	}
+
+	private BeatmapManager(CCSCore game)
 	{
 		this.game = game;
 		this.setListOfBeatmapsByDirectory(new HashMap<FileHandle, Beatmap>());
+	}
 
+	public static BeatmapManager getInstance()
+	{
+		if(instance == null)
+		{
+			instance = new BeatmapManager();
+		}
+		return instance;
+	}
+
+	public static BeatmapManager initialize(CCSCore game)
+	{
+		if(instance == null)
+		{
+			instance = new BeatmapManager(game);
+		}
+		return instance;
 	}
 
 	public void initAllBeatmaps()

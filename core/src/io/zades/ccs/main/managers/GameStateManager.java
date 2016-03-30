@@ -11,6 +11,8 @@ import java.util.HashMap;
  */
 public class GameStateManager
 {
+	private static  GameStateManager instance;
+
 	public static enum GAME_STATE
 	{
 		PRELOAD,
@@ -27,11 +29,33 @@ public class GameStateManager
 	private GAME_STATE currentState;
 	private CCSCore game;
 
-	public GameStateManager(CCSCore game)
+	private GameStateManager()
+	{
+		super();
+	}
+	private GameStateManager(CCSCore game)
 	{
 		this.game = game;
 		this.gameStateList = new HashMap<GAME_STATE, AbstractGameState>();
 		this.currentState = null;
+	}
+
+	public static GameStateManager getInstance()
+	{
+		if(instance == null)
+		{
+			instance = new GameStateManager();
+		}
+		return instance;
+	}
+
+	public static GameStateManager initialize(CCSCore game)
+	{
+		if(instance == null)
+		{
+			instance = new GameStateManager(game);
+		}
+		return instance;
 	}
 
 	public void initStates()

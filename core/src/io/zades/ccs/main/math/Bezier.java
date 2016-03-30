@@ -1,5 +1,6 @@
 package io.zades.ccs.main.math;
 
+import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class Bezier extends Path
 		{
 			//calculates points
 			this.cachedCalculatedPoints.add(this.deCasteljanAlgorithm(this.points, (float) (1.0 / ((float) segments) * x)));
+			//this.cachedCalculatedPoints.add(this.deCasteljanAlgorithm(this.points.size() - 1, 0, (float) (1.0 / ((float) segments) * x)));
 			//calculates derv points
 			//this.cachedCalculatedDervPoints.add(this.deCasteljanAlgorithm(this.dervPoints, (float) (1.0 / ((float) segments) * x)).getNormalizedVector(Vector.VectorType.GAME));
 		}
@@ -113,6 +115,26 @@ public class Bezier extends Path
 
 			return deCasteljanAlgorithm(newPoints, t);
 		}
+	}
+
+	/**
+	 * http://protein.ektf.hu/book/export/html/51
+	 * @param r
+	 * @param i
+	 * @param t
+	 * @return
+	 */
+	private Vector2 deCasteljanAlgorithmAlt(int r, int i, double t)
+	{
+		if(r == 0)
+		{
+			return points.get(i);
+		}
+
+		Vector2 p1 = deCasteljanAlgorithmAlt(r - 1, i, t);
+		Vector2 p2 = deCasteljanAlgorithmAlt(r - 1, i + 1, t);
+
+		return new Vector2((float) ((1 - t) * p1.x + t * p2.x), (float) ((1 - t) * p1.y + t * p2.y));
 	}
 
 	/**

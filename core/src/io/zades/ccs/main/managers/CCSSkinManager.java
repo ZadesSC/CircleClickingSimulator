@@ -14,6 +14,8 @@ public class CCSSkinManager
 	public static final String DEFAULT_SKIN_PATH = "assets/data/default-skin/";
 	public static final String SKIN_PATH = "Skins/";
 
+	private static CCSSkinManager instance;
+
 	private CCSCore game;
 	private CCSSkin currentCCSSkin;
 	private CCSSkin defaultCCSSkin;
@@ -21,11 +23,32 @@ public class CCSSkinManager
 	//The list of skins by their directory, which should be unique
 	private HashMap<String, CCSSkin> listOfSkinsByDirectory;
 
-	public CCSSkinManager(CCSCore game)
+	private CCSSkinManager()
+	{
+		super();
+	}
+	private CCSSkinManager(CCSCore game)
 	{
 		this.game = game;
 		this.setListOfSkinsByDirectory(new HashMap<String, CCSSkin>());
+	}
 
+	public static CCSSkinManager getInstance()
+	{
+		if(instance == null)
+		{
+			instance = new CCSSkinManager();
+		}
+		return instance;
+	}
+
+	public static CCSSkinManager initialize(CCSCore game)
+	{
+		if(instance == null)
+		{
+			instance = new CCSSkinManager(game);
+		}
+		return instance;
 	}
 
 	public void initAllSkins()
