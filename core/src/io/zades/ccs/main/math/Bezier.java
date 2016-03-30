@@ -2,6 +2,7 @@ package io.zades.ccs.main.math;
 
 import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,20 +21,20 @@ public class Bezier extends Path
 		this.cachedCalculatedDervPoints = new ArrayList<>();
 		this.estimatedLength = this.estimateLength(this.points);
 
-		this.calculateDervPoints();
+		//this.calculateDervPoints();
 		this.calculatePath();
 	}
 
 	@Override
 	public Vector2 valueAt(float t)
 	{
-		return this.deCasteljanAlgorithm(this.points, t);
+		return this.deCasteljanAlgorithm(this.points.size(), 0, t).getKey();
 	}
 
 	@Override
 	public Vector2 derivativeAt(float t)
 	{
-		return this.deCasteljanAlgorithm(this.dervPoints, t);
+		return this.deCasteljanAlgorithmAlt(this.dervPoints, t);
 	}
 
 	@Override
@@ -57,10 +58,12 @@ public class Bezier extends Path
 		for(int x = 0; x < segments; x++)
 		{
 			//calculates points
-			this.cachedCalculatedPoints.add(this.deCasteljanAlgorithm(this.points, (float) (1.0 / ((float) segments) * x)));
+			Pair<Vector2, Vector2> pointAndSlope = this.deCasteljanAlgorithm(this.points.size() - 1, 0, (float) (1.0 / ((float) segments) * x));
+			this.cachedCalculatedPoints.add(pointAndSlope.getKey());
 			//this.cachedCalculatedPoints.add(this.deCasteljanAlgorithm(this.points.size() - 1, 0, (float) (1.0 / ((float) segments) * x)));
 			//calculates derv points
-			//this.cachedCalculatedDervPoints.add(this.deCasteljanAlgorithm(this.dervPoints, (float) (1.0 / ((float) segments) * x)).getNormalizedVector(Vector.VectorType.GAME));
+			//this.cachedCalculatedDervPoints.add(this.deCasteljanAlgorithm(this.dervPoints.size() - 1, 0, (float) (1.0 / ((float) segments) * x)));
+			this.cachedCalculatedDervPoints.add(pointAndSlope.getValue());
 		}
 
 		//recalculate the length
@@ -97,7 +100,7 @@ public class Bezier extends Path
 	 * @param t The position in the curve where  0 <= t <= 1
 	 * @return The coords at t in the curve
 	 */
-	private Vector2 deCasteljanAlgorithm(List<Vector2> points, float t)
+	private Vector2 deCasteljanAlgorithmAlt(List<Vector2> points, float t)
 	{
 		if(points.size() == 1)
 		{
@@ -113,7 +116,7 @@ public class Bezier extends Path
 				newPoints.add(new Vector2(x, y));
 			}
 
-			return deCasteljanAlgorithm(newPoints, t);
+			return deCasteljanAlgorithmAlt(newPoints, t);
 		}
 	}
 
@@ -124,17 +127,32 @@ public class Bezier extends Path
 	 * @param t
 	 * @return
 	 */
-	private Vector2 deCasteljanAlgorithmAlt(int r, int i, double t)
+//	private Vector2 deCasteljanAlgorithm(int r, int i, double t)
+//	{
+//		if(r == 0)
+//		{
+//			return points.get(i);
+//		}
+//
+//		Vector2 p1 = deCasteljanAlgorithm(r - 1, i, t);
+//		Vector2 p2 = deCasteljanAlgorithm(r - 1, i + 1, t);
+//
+//		this.cachedCalculatedDervPoints.add(new Vector2(p2.x - p1.x, p2.y - p1.y));
+//
+//		return new Vector2((float) ((1 - t) * p1.x + t * p2.x), (float) ((1 - t) * p1.y + t * p2.y));
+//	}
+
+	private Pair<Vector2, Vector2> deCasteljanAlgorithm(int r, int i, double t)
 	{
 		if(r == 0)
 		{
-			return points.get(i);
+			return new Pair<>(points.get(i), null);
 		}
 
-		Vector2 p1 = deCasteljanAlgorithmAlt(r - 1, i, t);
-		Vector2 p2 = deCasteljanAlgorithmAlt(r - 1, i + 1, t);
+		Vector2 p1 = deCasteljanAlgorithm(r - 1, i, t).getKey();
+		Vector2 p2 = deCasteljanAlgorithm(r - 1, i + 1, t).getKey();
 
-		return new Vector2((float) ((1 - t) * p1.x + t * p2.x), (float) ((1 - t) * p1.y + t * p2.y));
+		return new Pair<>(new Vector2((float) ((1 - t) * p1.x + t * p2.x), (float) ((1 - t) * p1.y + t * p2.y)), new Vector2(p2.x - p1.x, p2.y - p1.y));
 	}
 
 	/**
